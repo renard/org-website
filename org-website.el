@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2010-11-22 15:25:34
+;; Last changed: 2010-12-21 17:16:33
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -390,22 +390,21 @@ This function is intended to replace `org-publis-org-sitemap' for websites."
   (let* ((base-dir (file-name-as-directory
 		    (plist-get project-plist :base-directory)))
 	 (pub-dir (file-name-as-directory
-		   (plist-get project-plist :publishing-directory))))
-
-    (with-temp-buffer
-      (erase-buffer)
-      (html-mode)
-      (insert "<ul>\n")
-      (org-website-generate-sitemap (directory-tree base-dir))
-      (insert "</ul>\n")
-      (indent-region (point-min) (point-max))
-      (write-file (concat base-dir sitemap-filename)))))
+		   (plist-get project-plist :publishing-directory)))
+	 (build-buffer (get-buffer-create (plist-get project-plist :sitemap-buffer))))
+    (set-buffer build-buffer)
+    (erase-buffer)
+    (html-mode)
+    (insert "<ul>\n")
+    (org-website-generate-sitemap (directory-tree base-dir))
+    (insert "</ul>\n")
+    (indent-region (point-min) (point-max))))
 
 
 (defun org-website-menu (&optional sitemap-file)
   "Insert the generated menu inside the HTML page."
   (with-temp-buffer
-    (insert-file-contents (concat base-dir sitemap-filename))
+    (insert-buffer-substring-no-properties (plist-get project-plist :sitemap-buffer))
     (beginning-of-buffer)
     (save-match-data
       (while
