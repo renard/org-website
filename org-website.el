@@ -638,7 +638,9 @@ The `org-publish-after-export-hook' is modified."
 (defun org-website-publish-run-all-processes ()
   (org-website-publish-run-processes
    (plist-get project-plist :project-shell-final-commands)
-   (plist-get project-plist :project-root)))
+   (plist-get project-plist :project-root))
+  (kill-buffer (plist-get project-plist :sitemap-buffer))
+  (kill-buffer (plist-get project-plist :rss-buffer)))
 
 
 (defadvice org-html-make-link (after ows:org-html-make-link activate)
