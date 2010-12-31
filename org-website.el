@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2010-12-21 17:16:33
+;; Last changed: 2010-12-31 12:30:18
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -143,6 +143,29 @@ file
 Same as `org-website-publish-include-header'."
   :type 'string
   :group 'org-publish-website)
+
+
+
+(defcustom org-website-what-s-new-header
+  "<div class=\"what-s-new\"><ul>"
+  "HTML fragment header to be used when publishing changes using
+`org-website-publish-what-s-new'.")
+
+(defcustom org-website-what-s-new-footer
+  "</ul></div>"
+  "HTML fragment footer to be used when publishing changes using
+`org-website-publish-what-s-new'.")
+
+(defcustom org-website-what-s-new-item
+  "<li>
+<span class=\"date\">${date}<span>
+<a href=\"<lisp>path-to-root</lisp>${file}\"\">
+<span class=\"description\">${desc}<span>
+</a>
+</li>"
+  "HTML fragment to be used when publishing changes using
+`org-website-publish-what-s-new'.")
+
 
 
 (defun org-website-publish-admonition ()
@@ -293,6 +316,40 @@ File is also copied into the publishing directory"
 	    (copy-file src-file-fp pub-dir t t)))))))
 
 
+(defun org-website-publish-whats-new ()
+  "Publish last entries for last change list.
+
+Syntax is:
+
+#+WHATSNEW: <count>"
+  (let* ((what-s-new (with-temp-buffer
+		       (insert-buffer (plist-get project-plist :rss-buffer))
+		       (sort-lines t (point-min) (point-max))
+		       (split-string (buffer-string) "\n")))
+	 params count substitute)
+    (save-match-data
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward "^#\\+WHATSNEW:?[ \t]+\\(.*\\)" nil t)
+	  (setq params (read (concat "(" (match-string 1) ")"))
+		count (or
+		       (org-symname-or-string (pop params))
+		       10))
+	  (end-of-line)
+	  (insert 
+	   "\n#+BEGIN_HTML\n"
+	   org-website-what-s-new-header)
+	  (loop for i upto count
+		do (let ((item (split-string (nth i what-s-new) "\t")))
+		     (insert
+		      (string-template org-website-what-s-new-item
+				       `(:date ,(car item)
+					       :file ,(cadr item)
+					       :title ,(caddr item)
+					       :desc ,(cadddr item))))))
+	  (insert org-website-what-s-new-footer "\n#+END_HTML\n"))))))
+
+
 (defun org-website-get-file-property (prop &optional org-file remove-p-tag)
   "Return PROP property from ORG-FILE.
 
@@ -332,7 +389,15 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 	    (file-name-sans-extension (file-relative-name page base-dir))
 	    ".html"))
 	  (title (org-website-get-file-property "title" page t))
-	  (desc (org-website-get-file-property "description" page t)))
+	  (desc (org-website-get-file-property "description" page t))
+	  (date (org-website-get-file-property "date" page t)))
+      ;; Generate list for what-new command
+      (set-buffer (get-buffer-create (plist-get
+				      project-plist :rss-buffer)))
+      (insert (format "%s\t%s\t%s\t%s\n"
+	      date file title desc))
+      (set-buffer (get-buffer-create (plist-get
+				      project-plist :sitemap-buffer)))
       (with-temp-buffer
 	(insert desc)
 	(save-match-data
@@ -461,7 +526,8 @@ The `org-publish-before-export-hook' is modified."
    (org-website-publish-add-header-and-footer)
    (org-website-publish-include)
    (org-website-publish-admonition)
-   (org-website-publish-copy)))
+   (org-website-publish-copy)
+   (org-website-publish-whats-new)))
 (add-hook 'org-publish-before-export-hook 'org-publish-prepare-current-file)
 
 
