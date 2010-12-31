@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2010-12-31 12:30:18
+;; Last changed: 2010-12-31 15:07:08
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -377,6 +377,14 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 	    (setq ret (replace-regexp-in-string "</?p>" "" ret)))
 	  ret)))))
 
+
+(defun org-website-publish-date (&optional lang format)
+  "Return pushishing page date using FORMAT in LANG."
+  (let* ((format (or format "%Y-%m-%dT%T%z"))
+	 (system-time-locale (or lang "C")))
+    (format-time-string
+     format
+     (date-to-time (org-website-get-file-property "date" nil t)) t)))
 
 (defun org-website-sitemap-get-file-info (page)
   "Return an HTML formated string containing the PAGE title and description."
