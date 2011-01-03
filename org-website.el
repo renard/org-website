@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2010-12-31 15:07:08
+;; Last changed: 2011-01-03 14:33:52
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -349,6 +349,51 @@ Syntax is:
 					       :desc ,(cadddr item))))))
 	  (insert org-website-what-s-new-footer "\n#+END_HTML\n"))))))
 
+
+(defun org-website-publish-rss ()
+  "Publish RSS file.
+
+Syntax is:
+
+#+RSS: <base_url> <file>"
+  (let* ((rss (with-temp-buffer
+		(insert-buffer (plist-get project-plist :rss-buffer))
+		(sort-lines t (point-min) (point-max))
+		(split-string (buffer-string) "\n")))
+	 params base-url file)
+    (save-match-data
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward "^#\\+RSS:?[ \t]+\\(.*\\)" nil t)
+	  (setq params (read (concat "(" (match-string 1) ")"))
+		base-url (org-symname-or-string (pop params))
+		file (org-symname-or-string (pop params)))
+	  (find-file (concat pub-dir "/" file))
+	  (erase-buffer)
+	  (insert
+	   "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+	   "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">"
+	   "<title>"(org-website-get-file-property "title" nil t)"</title>"
+	   "<link>" base-url "</link>"
+	   "<description>"(org-website-get-file-property "description" nil t)"</description>"
+	   "<atom:link href=\"" pub-dir "/" file 
+	   "\" rel=\"self\" type=\"application/rss+xml\"/>")
+	  (loop for line in rss
+		do (let ((item (split-string line "\t")))
+		     (when (cadr item)
+		       (insert
+			"<item>"
+			"<title>"(caddr item)"</title>"
+			"<link>" base-url "/" (cadr item) "</link>"
+			"<description>"(cadddr item)"</description>"
+			"<pubDate>"(car item)"</pubDate>"
+			"<guid>" base-url "/" (cadr item) "</guid>"
+			"</item>"))))
+	  (insert "</rss>")
+	  (replace-string "/<lisp>path-to-root</lisp>" "" nil (point-min) (point-max))
+	  (save-buffer)
+	  (kill-buffer))))))
+
 
 (defun org-website-get-file-property (prop &optional org-file remove-p-tag)
   "Return PROP property from ORG-FILE.
@@ -535,7 +580,8 @@ The `org-publish-before-export-hook' is modified."
    (org-website-publish-include)
    (org-website-publish-admonition)
    (org-website-publish-copy)
-   (org-website-publish-whats-new)))
+   (org-website-publish-whats-new)
+   (org-website-publish-rss)))
 (add-hook 'org-publish-before-export-hook 'org-publish-prepare-current-file)
 
 
