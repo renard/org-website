@@ -158,9 +158,9 @@ Same as `org-website-publish-include-header'."
 
 (defcustom org-website-what-s-new-item
   "<li>
-<span class=\"date\">${date}<span>
+<span class=\"date\">${date}</span>
 <a href=\"<lisp>path-to-root</lisp>${file}\"\">
-<span class=\"description\">${desc}<span>
+<span class=\"description\">${desc}</span>
 </a>
 </li>"
   "HTML fragment to be used when publishing changes using
