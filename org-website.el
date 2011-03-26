@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-01-06 18:01:28
+;; Last changed: 2011-03-11 15:48:58
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -500,9 +500,9 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 	;; Close first opened <li>
 	(insert "</li>\n")))))
 
-(defun org-website-publish-sitemap (project)
+(defun org-website-publish-sitemap ()
   "Generate HTML template that could be used later in HTML pages.
-This function is intended to replace `org-publis-org-sitemap' for websites."
+This function is intended to replace `org-publish-org-sitemap' for websites."
   ;; Variables defined in `org-publish-projects':
   ;;   - `project-plist'
   ;;  
