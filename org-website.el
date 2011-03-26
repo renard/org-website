@@ -419,7 +419,8 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 		(substring-no-properties
 		 (org-export-string (match-string 1) "html")))))
 	  (when remove-p-tag
-	    (setq ret (replace-regexp-in-string "</?p>" "" ret)))
+	    (setq ret (replace-regexp-in-string "</?p>" "" ret))
+	    (setq ret (replace-regexp-in-string "</\\(div\\|body\\|html\\)>" "" ret)))
 	  ret)))))
 
 
