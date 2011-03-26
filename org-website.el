@@ -159,7 +159,7 @@ Same as `org-website-publish-include-header'."
 (defcustom org-website-what-s-new-item
   "<li>
 <span class=\"date\">${date}</span>
-<a href=\"<lisp>path-to-root</lisp>${file}\"\">
+<a href=\"<lisp>path-to-root</lisp>${file}\">
 <span class=\"description\">${desc}</span>
 </a>
 </li>"
