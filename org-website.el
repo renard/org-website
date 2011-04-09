@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-04-09 15:35:31
+;; Last changed: 2011-04-10 00:03:46
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -374,11 +374,12 @@ Syntax is:
 	  (insert
 	   "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
 	   "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">"
+	   "<channel>"
 	   "<title>"(org-website-get-file-property "title" nil t)"</title>"
 	   "<link>" base-url "</link>"
 	   "<description>"(org-website-get-file-property "description" nil t)
 	   "</description>"
-	   "<atom:link href=\"" pub-dir "/" file
+	   "<atom:link href=\"" base-url file
 	   "\" rel=\"self\" type=\"application/rss+xml\"/>")
 	  (loop for line in rss
 		do (let ((item (split-string line "\t")))
@@ -386,12 +387,24 @@ Syntax is:
 		       (insert
 			"<item>"
 			"<title>"(caddr item)"</title>"
-			"<link>" base-url "/" (cadr item) "</link>"
-			"<description>"(cadddr item)"</description>"
-			"<pubDate>"(car item)"</pubDate>"
-			"<guid>" base-url "/" (cadr item) "</guid>"
+			"<link>" base-url (cadr item) "</link>"
+			"<description>"
+			(replace-regexp-in-string
+			 "</?.*?>"
+			 ""
+			 (cadddr item))
+			"</description>"
+			"<pubDate>"
+			(format-time-string
+			 "%a, %d %b %Y %T %z"
+			 (apply 'encode-time
+				(parse-time-string (car item))))
+			"</pubDate>"
+			"<guid>" base-url (cadr item) "</guid>"
 			"</item>"))))
-	  (insert "</rss>")
+	  (insert
+	   "</channel>"
+	   "</rss>")
 	  (replace-string "/<lisp>path-to-root</lisp>" "" nil (point-min)
 			  (point-max))
 	  (save-buffer)
