@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-04-09 15:11:15
+;; Last changed: 2011-04-09 15:35:31
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -25,10 +25,11 @@
 ;;
 ;; Required modules:
 ;;   - `string-template': http://elisp-string-template.git.chezwam.org
-;;   - `dirtree': http://www.splode.com/~friedman/software/emacs-lisp/src/dirtree.el
+;;   - `dirtree':
+;;     http://www.splode.com/~friedman/software/emacs-lisp/src/dirtree.el
 ;;
-;; This basically setup some hooks to be launched when publishing. Used hooks are:
-;; `org-publish-before-export-hook' and `org-publish-after-export-hook'.
+;; This basically setup some hooks to be launched when publishing. Used hooks
+;; are: `org-publish-before-export-hook' and `org-publish-after-export-hook'.
 ;;
 ;; In addition all variables from `org-website-publish-with-vars' are visible.
 ;; Refer to `org-website-publish-with-vars' for further information.
@@ -77,7 +78,8 @@ Variables visible from `org-publish-after-export-hook':
     - `export-buf-or-file': the buffer containing the export output."
   `(let* ((filename-rel (file-relative-name filename base-dir))
 	  (file-dir (file-name-directory filename-rel))
-	  (ppub-dir (expand-file-name (plist-get project-plist :publishing-directory)))
+	  (ppub-dir (expand-file-name (plist-get project-plist
+						 :publishing-directory)))
 	  (pub-file (if (boundp 'export-buf-or-file)
 			(if (bufferp export-buf-or-file)
 			    (buffer-file-name export-buf-or-file)
@@ -89,10 +91,9 @@ Variables visible from `org-publish-after-export-hook':
 	  (pub-file-dir (if pub-file-rel
 			    (file-name-directory pub-file-rel)
 			  nil))
-	  (path-to-root (file-relative-name base-dir (file-name-directory filename))))
-     
+	  (path-to-root (file-relative-name base-dir (file-name-directory
+						      filename))))
      ,@body))
-
 
 
 (defcustom org-website-publish-admonition-header
@@ -221,7 +222,8 @@ HTML fragments can be customized using both
 	  (delete-region (point) (point-at-eol))
 	  (unless
 	      (re-search-forward "^#\\+END_ADMONITION" nil t)
-	    (error "#+END_ADMONITION not found in %s@%s." (buffer-file-name) (point)))
+	    (error "#+END_ADMONITION not found in %s@%s." (buffer-file-name)
+		   (point)))
 	  (beginning-of-line)
 	  (insert
 	   "\n#+BEGIN_HTML\n"
@@ -260,9 +262,6 @@ Be aware this function is designed to be run from
 					 '(lambda (x)
 					    (string= "" x))
 					 (split-string  src "/")))))))
-	  
-	  (message (format "** Copying from %s to %s" src dst))
-	  
 	  (beginning-of-line)
 	  (delete-region (point) (point-at-eol))
 	  (if (file-directory-p src)
@@ -304,13 +303,15 @@ File is also copied into the publishing directory"
 	      (insert
 	       (format " \"%s\""
 		       (substring (symbol-name
-				   (with-temp-buffer (insert-file-contents src-file-fp)
-						     (set-auto-mode)
-						     major-mode))
+				   (with-temp-buffer
+				     (insert-file-contents src-file-fp)
+				     (set-auto-mode)
+				     major-mode))
 				  0 -5))))
 	    (insert (format
 		     "\n#+BEGIN_HTML\n%s\n#+END_HTML\n"
-		     (string-template org-website-publish-include-footer substitute)))
+		     (string-template org-website-publish-include-footer
+				      substitute)))
 	    ;; Copy the file to the publishing-directory.
 	    (make-directory pub-dir t)
 	    (copy-file src-file-fp pub-dir t t)))))))
@@ -336,7 +337,7 @@ Syntax is:
 		       (org-symname-or-string (pop params))
 		       10))
 	  (end-of-line)
-	  (insert 
+	  (insert
 	   "\n#+BEGIN_HTML\n"
 	   org-website-what-s-new-header)
 	  (loop for i upto count
@@ -375,8 +376,9 @@ Syntax is:
 	   "<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">"
 	   "<title>"(org-website-get-file-property "title" nil t)"</title>"
 	   "<link>" base-url "</link>"
-	   "<description>"(org-website-get-file-property "description" nil t)"</description>"
-	   "<atom:link href=\"" pub-dir "/" file 
+	   "<description>"(org-website-get-file-property "description" nil t)
+	   "</description>"
+	   "<atom:link href=\"" pub-dir "/" file
 	   "\" rel=\"self\" type=\"application/rss+xml\"/>")
 	  (loop for line in rss
 		do (let ((item (split-string line "\t")))
@@ -390,7 +392,8 @@ Syntax is:
 			"<guid>" base-url "/" (cadr item) "</guid>"
 			"</item>"))))
 	  (insert "</rss>")
-	  (replace-string "/<lisp>path-to-root</lisp>" "" nil (point-min) (point-max))
+	  (replace-string "/<lisp>path-to-root</lisp>" "" nil (point-min)
+			  (point-max))
 	  (save-buffer)
 	  (kill-buffer))))))
 
@@ -420,7 +423,8 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 		 (org-export-string (match-string 1) "html")))))
 	  (when remove-p-tag
 	    (setq ret (replace-regexp-in-string "</?p>" "" ret))
-	    (setq ret (replace-regexp-in-string "</\\(div\\|body\\|html\\)>" "" ret)))
+	    (setq ret (replace-regexp-in-string "</\\(div\\|body\\|html\\)>"
+						"" ret)))
 	  ret)))))
 
 
@@ -468,7 +472,7 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
   (when (stringp dt)
     (setq dt (list dt)))
   (let* ((dir (car dt))
-	 (files 
+	 (files
 	  (remove-if '(lambda (x) (or (string= "index.org" x)
 				      (string= "search.org" x)
 				      (file-directory-p (concat dir x))))
@@ -505,7 +509,7 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 This function is intended to replace `org-publish-org-sitetree' for websites."
   ;; Variables defined in `org-publish-projects':
   ;;   - `project-plist'
-  ;;  
+  ;;
   (let* ((base-dir (file-name-as-directory
 		    (plist-get project-plist :base-directory)))
 	 (pub-dir (file-name-as-directory
@@ -523,7 +527,8 @@ This function is intended to replace `org-publish-org-sitetree' for websites."
 (defun org-website-menu (&optional sitetree-file)
   "Insert the generated menu inside the HTML page."
   (with-temp-buffer
-    (insert-buffer-substring-no-properties (plist-get project-plist :sitetree-buffer))
+    (insert-buffer-substring-no-properties (plist-get
+					    project-plist :sitetree-buffer))
     (beginning-of-buffer)
     (save-match-data
       (while
@@ -538,8 +543,9 @@ This function is intended to replace `org-publish-org-sitetree' for websites."
 	  (unless
 	      (string= ".."
 		       (car (split-string
-			     (file-relative-name pub-file-rel
-						 (file-name-directory dir)) "/")))
+			     (file-relative-name
+			      pub-file-rel
+			      (file-name-directory dir)) "/")))
 	    (setq class (concat class " selected")))
 	  (when
 	      (string= dir pub-file-rel)
@@ -681,7 +687,8 @@ The `org-publish-after-export-hook' is modified."
     (let* ((cmd-line (car processes))
 	   (cmd (car cmd-line))
 	   (args (cdr cmd-line))
-	   (cmd-buf (get-buffer-create (format "ORG Website running %s" cmd-line)))
+	   (cmd-buf (get-buffer-create (format "ORG Website running %s"
+					       cmd-line)))
 	   (default-directory dir)
 	   (proc (apply 'start-process cmd cmd-buf cmd args)))
       (process-put proc :next (cdr processes))
@@ -705,10 +712,8 @@ The `org-publish-after-export-hook' is modified."
     (beginning-of-buffer)
     (save-match-data
       (when (search-forward-regexp "href=\"\\([^\"]+\\)\"" nil t)
-	(insert (format " title=\"%s\" class=\"link-tooltip\"" (match-string-no-properties 1)))))
+	(insert (format " title=\"%s\" class=\"link-tooltip\""
+			(match-string-no-properties 1)))))
     (setq ad-return-value (buffer-string))))
-
-
-
 
 (provide 'org-website)
