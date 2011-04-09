@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-03-11 15:48:58
+;; Last changed: 2011-04-09 15:11:15
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -432,7 +432,7 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
      format
      (date-to-time (org-website-get-file-property "date" nil t)) t)))
 
-(defun org-website-sitemap-get-file-info (page)
+(defun org-website-sitetree-get-file-info (page)
   "Return an HTML formated string containing the PAGE title and description."
   ;; Use default page name
   (when (file-directory-p page)
@@ -451,7 +451,7 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
       (insert (format "%s\t%s\t%s\t%s\n"
 	      date file title desc))
       (set-buffer (get-buffer-create (plist-get
-				      project-plist :sitemap-buffer)))
+				      project-plist :sitetree-buffer)))
       (with-temp-buffer
 	(insert desc)
 	(save-match-data
@@ -462,8 +462,8 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
        "<a href=\"<lisp>path-to-root</lisp>%s\" class=\"menu-tooltip\" title=\"%s\">%s</a>"
        file desc title))))
 
-(defun org-website-generate-sitemap (dt)
-  "Generate the sitemap from given DT directory tree."
+(defun org-website-generate-sitetree (dt)
+  "Generate the sitetree from given DT directory tree."
   ;; Only lists are handled
   (when (stringp dt)
     (setq dt (list dt)))
@@ -474,7 +474,7 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 				      (file-directory-p (concat dir x))))
 		     (directory-files dir nil "\\.org$")))
 	(subdir (cdr dt))
-	(dirstr (org-website-sitemap-get-file-info dir)))
+	(dirstr (org-website-sitetree-get-file-info dir)))
     (when dirstr
       (if (not (or subdir files))
 	  ;; directory has no subdirs nor files.
@@ -483,14 +483,14 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 	(when subdir
 	  (insert "<ul>\n")
 	  ;; insert directories first
-	  (mapcar '(lambda (x) (org-website-generate-sitemap x)) subdir)
+	  (mapcar '(lambda (x) (org-website-generate-sitetree x)) subdir)
 	  (insert "</ul>\n"))
 	;; insert files
 	(when files
 	  (insert "<ul>\n")
 	  (mapcar
 	   '(lambda (x)
-	      (let ((dirstr (org-website-sitemap-get-file-info
+	      (let ((dirstr (org-website-sitetree-get-file-info
 			     (concat dir x))))
 		(when dirstr
 		  (insert
@@ -500,9 +500,9 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 	;; Close first opened <li>
 	(insert "</li>\n")))))
 
-(defun org-website-publish-sitemap ()
+(defun org-website-publish-sitetree ()
   "Generate HTML template that could be used later in HTML pages.
-This function is intended to replace `org-publish-org-sitemap' for websites."
+This function is intended to replace `org-publish-org-sitetree' for websites."
   ;; Variables defined in `org-publish-projects':
   ;;   - `project-plist'
   ;;  
@@ -510,20 +510,20 @@ This function is intended to replace `org-publish-org-sitemap' for websites."
 		    (plist-get project-plist :base-directory)))
 	 (pub-dir (file-name-as-directory
 		   (plist-get project-plist :publishing-directory)))
-	 (build-buffer (get-buffer-create (plist-get project-plist :sitemap-buffer))))
+	 (build-buffer (get-buffer-create (plist-get project-plist :sitetree-buffer))))
     (set-buffer build-buffer)
     (erase-buffer)
     (html-mode)
     (insert "<ul>\n")
-    (org-website-generate-sitemap (directory-tree base-dir))
+    (org-website-generate-sitetree (directory-tree base-dir))
     (insert "</ul>\n")
     (indent-region (point-min) (point-max))))
 
 
-(defun org-website-menu (&optional sitemap-file)
+(defun org-website-menu (&optional sitetree-file)
   "Insert the generated menu inside the HTML page."
   (with-temp-buffer
-    (insert-buffer-substring-no-properties (plist-get project-plist :sitemap-buffer))
+    (insert-buffer-substring-no-properties (plist-get project-plist :sitetree-buffer))
     (beginning-of-buffer)
     (save-match-data
       (while
@@ -694,7 +694,7 @@ The `org-publish-after-export-hook' is modified."
   (org-website-publish-run-processes
    (plist-get project-plist :project-shell-final-commands)
    (plist-get project-plist :project-root))
-  (kill-buffer (plist-get project-plist :sitemap-buffer))
+  (kill-buffer (plist-get project-plist :sitetree-buffer))
   (kill-buffer (plist-get project-plist :rss-buffer)))
 
 
