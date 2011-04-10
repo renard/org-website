@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-04-10 00:03:46
+;; Last changed: 2011-04-10 11:27:27
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -377,6 +377,7 @@ Syntax is:
 	   "<channel>"
 	   "<title>"(org-website-get-file-property "title" nil t)"</title>"
 	   "<link>" base-url "</link>"
+	   "<generator>org-website (https://github.com/renard/org-website)</generator>"
 	   "<description>"(org-website-get-file-property "description" nil t)
 	   "</description>"
 	   "<atom:link href=\"" base-url file
