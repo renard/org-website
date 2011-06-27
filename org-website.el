@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-04-10 11:27:27
+;; Last changed: 2011-06-27 18:04:29
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -40,6 +40,7 @@
 (require 'org-publish)
 (require 'org-html)
 (require 'dirtree)
+(require 'cl)
 
 (defmacro org-website-publish-with-vars (&rest body)
   "Execute BODY with a declaration of following variables after
@@ -723,7 +724,7 @@ The `org-publish-after-export-hook' is modified."
   "Add title element to the html <a> tag."
   (with-temp-buffer
     (insert ad-return-value)
-    (beginning-of-buffer)
+    (goto-char (point-min))
     (save-match-data
       (when (search-forward-regexp "href=\"\\([^\"]+\\)\"" nil t)
 	(insert (format " title=\"%s\" class=\"link-tooltip\""
