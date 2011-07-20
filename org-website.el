@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-06-27 18:04:29
+;; Last changed: 2011-07-20 12:38:16
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -519,6 +519,7 @@ If REMOVE-P-TAG is set, the paragraph tag (<p>) would be stripped."
 	;; Close first opened <li>
 	(insert "</li>\n")))))
 
+;;;###autoload
 (defun org-website-publish-sitetree ()
   "Generate HTML template that could be used later in HTML pages.
 This function is intended to replace `org-publish-org-sitetree' for websites."
