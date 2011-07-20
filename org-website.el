@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-07-20 12:38:16
+;; Last changed: 2011-07-20 18:38:08
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -731,5 +731,35 @@ The `org-publish-after-export-hook' is modified."
 	(insert (format " title=\"%s\" class=\"link-tooltip\""
 			(match-string-no-properties 1)))))
     (setq ad-return-value (buffer-string))))
+
+;;;###autoload
+(defun org-website-publish-async (project &optional force)
+  "Publish website in async mode."
+  (interactive
+   (list
+    (assoc (org-icompleting-read
+	    "Publish project: "
+	    org-publish-project-alist nil t)
+	   org-publish-project-alist)
+    current-prefix-arg))
+  (let* ((extra-args (plist-get (cdr project) :website-async-opts))
+	 (project (car project))
+	 (force (if force "t" "nil"))
+	 (cmd-line
+	  (append command-line-args
+		  `("-batch"
+		    "-l"
+		    ,(concat (file-name-as-directory user-emacs-directory)
+			     "init.el")
+		    ,@extra-args
+		    "--eval"
+		    ,(format "(org-publish-project \"%s\" %s)" project force))))
+	 (cmd-buf (get-buffer-create (format "ORG Website async build %s" project)))
+	 (proc (apply 'start-process (car cmd-line)
+		      cmd-buf (car cmd-line) (cdr cmd-line))))
+    (process-put proc :cmd (format "Build %s" project))
+    (process-put proc :cmd-buf cmd-buf)
+    (set-process-sentinel proc 'org-website-publish-run-processes-sentinel)))
+
 
 (provide 'org-website)
