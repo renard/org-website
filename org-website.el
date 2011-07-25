@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-07-20 18:38:08
+;; Last changed: 2011-07-25 15:57:29
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -734,7 +734,19 @@ The `org-publish-after-export-hook' is modified."
 
 ;;;###autoload
 (defun org-website-publish-async (project &optional force)
-  "Publish website in async mode."
+  "Publish website in async mode.
+
+A `:website-async-opts' property could be set for a projects in
+`org-publish-project-alist'. For example:
+
+  :website-async-opts (\"-l\"
+		       ,(concat (file-name-as-directory
+				 user-emacs-directory)
+				\"init.el\")
+		       \"--eval\" \"(require (quote color-theme))\"
+		       \"--eval\" \"(require (quote color-theme-tango))\")
+
+"
   (interactive
    (list
     (assoc (org-icompleting-read
@@ -748,9 +760,6 @@ The `org-publish-after-export-hook' is modified."
 	 (cmd-line
 	  (append command-line-args
 		  `("-batch"
-		    "-l"
-		    ,(concat (file-name-as-directory user-emacs-directory)
-			     "init.el")
 		    ,@extra-args
 		    "--eval"
 		    ,(format "(org-publish-project \"%s\" %s)" project force))))
