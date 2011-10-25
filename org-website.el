@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-10-25 19:24:33
+;; Last changed: 2011-10-25 20:08:36
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -756,31 +756,42 @@ A `:website-async-opts' property could be set for a projects in
 "
   (interactive
    (list
-    (assoc (org-icompleting-read
-	    "Publish project: "
-	    org-publish-project-alist nil t)
-	   org-publish-project-alist)
+    (car (assoc (org-icompleting-read
+		 "Publish project: "
+		 org-website-alist nil t)
+		org-website-alist))
     current-prefix-arg))
-  (let* ((extra-args (plist-get (cdr project) :website-async-opts))
-	 (project (car project))
-	 (force (if force "t" "nil"))
+  (let* ((force (if force "t" "nil"))
 	 (cmd-line
 	  (append command-line-args
 		  `("-batch"
-		    ,@extra-args
+		    ,@org-website-async-options
 		    "--eval"
-		    ,(format "(org-publish-project \"%s\" %s)" project force))))
+		    ,(format "(org-publish-website \"%s\" %s)" project force))))
 	 (cmd-buf (get-buffer-create (format "ORG Website async build %s" project)))
 	 (proc (apply 'start-process (car cmd-line)
 		      cmd-buf (car cmd-line) (cdr cmd-line))))
+    (message "Run: %S" cmd-line)
     (process-put proc :cmd (format "Build %s" project))
     (process-put proc :cmd-buf cmd-buf)
     (set-process-sentinel proc 'org-website-publish-run-processes-sentinel)))
 
-
-(defun org-website-parse-configuration-file (website)
+;;;###autoload
+(defun org-publish-website (website &optional force)
   "Generate `org-publish-project-alist' according WEBSITE."
-  (let* ((filename (cadr (assoc website org-website-alist)))
+
+  (interactive
+   (list
+    (car (assoc (org-icompleting-read
+		 "Publish project: "
+		 org-website-alist nil t)
+		org-website-alist))
+    current-prefix-arg))
+
+  (message (format "Website: %s" website))
+  (message (format "Website-alist: %S" org-website-alist))
+  (message (format "F: %S" (cdr (assoc website org-website-alist))))
+  (let* ((filename (cdr (assoc website org-website-alist)))
 	 (project
 	  (with-temp-buffer
 	    (insert-file-contents-literally filename)
@@ -833,6 +844,6 @@ A `:website-async-opts' property could be set for a projects in
 
   (setq org-publish-project-alist
 	(list (cons website project)))
-  (org-publish website t)))
+  (org-publish website force)))
 
 (provide 'org-website)
