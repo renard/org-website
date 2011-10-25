@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-07-25 15:57:29
+;; Last changed: 2011-10-25 19:24:33
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -168,6 +168,13 @@ Same as `org-website-publish-include-header'."
   "HTML fragment to be used when publishing changes using
 `org-website-publish-what-s-new'.")
 
+(defvar org-website-alist nil
+  "List of all website to publish.
+
+Syntax of each item is:
+
+   (site-name . \"/path/to/site/configuration/file.el\")
+")
 
 
 (defun org-website-publish-admonition ()
@@ -770,5 +777,62 @@ A `:website-async-opts' property could be set for a projects in
     (process-put proc :cmd-buf cmd-buf)
     (set-process-sentinel proc 'org-website-publish-run-processes-sentinel)))
 
+
+(defun org-website-parse-configuration-file (website)
+  "Generate `org-publish-project-alist' according WEBSITE."
+  (let* ((filename (cadr (assoc website org-website-alist)))
+	 (project
+	  (with-temp-buffer
+	    (insert-file-contents-literally filename)
+	    (read (current-buffer))))
+	 org-publish-project-alist)
+
+    ;; :base-directory
+    (mapcar '(lambda (x)
+	       (let ((f (concat
+			 (file-name-directory filename)
+			 (plist-get project x))))
+		 (setq project (plist-put project x f))))
+	    '(:base-directory :website-header :website-footer))
+
+    ;; projet-root
+    (setq project
+	  (plist-put project :project-root
+		     (file-name-directory
+		      (plist-get project :base-directory))))
+
+    ;; :publishing-directory
+    (let ((v (plist-get project :publishing-directory)))
+      (unless (and v (file-name-absolute-p v))
+	(setq project
+	      (plist-put project :publishing-directory
+			 (file-name-as-directory
+			  (concat (file-name-directory filename) v))))))
+
+    (unless (plist-get project :rss-buffer)
+      (setq project (plist-put project :rss-buffer "*Org website rss*")))
+
+    (unless (plist-get project :sitetree-buffer)
+      (setq project (plist-put project :sitetree-buffer "*Org website sitetree*")))
+
+
+    (mapcar '(lambda(x)
+	       (let* ((v (plist-get project x)))
+
+		 (when (and v (not (file-name-absolute-p v)))
+		   (setq v (concat (file-name-directory filename) v)))
+
+		 (when (file-readable-p v)
+		   (setq project
+			 (plist-put
+			  project x
+			  (with-temp-buffer
+			    (insert-file-contents v)
+			    (buffer-string)))))))
+	    '(:html-preamble :html-postamble))
+
+  (setq org-publish-project-alist
+	(list (cons website project)))
+  (org-publish website t)))
 
 (provide 'org-website)
