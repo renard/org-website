@@ -4,7 +4,7 @@
 
 ;; Author: Sébastien Gross <seb•ɑƬ•chezwam•ɖɵʈ•org>
 ;; Keywords: Emacs, org
-;; Last changed: 2011-10-25 20:08:36
+;; Last changed: 2011-10-25 20:29:03
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -788,10 +788,7 @@ A `:website-async-opts' property could be set for a projects in
 		org-website-alist))
     current-prefix-arg))
 
-  (message (format "Website: %s" website))
-  (message (format "Website-alist: %S" org-website-alist))
-  (message (format "F: %S" (cdr (assoc website org-website-alist))))
-  (let* ((filename (cdr (assoc website org-website-alist)))
+  (let* ((filename (cadr (assoc website org-website-alist)))
 	 (project
 	  (with-temp-buffer
 	    (insert-file-contents-literally filename)
